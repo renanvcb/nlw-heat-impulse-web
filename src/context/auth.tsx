@@ -11,6 +11,7 @@ type User = {
 type AuthContextData = {
   user: User | null;
   signInUrl: string;
+  signOut: () => void;
 }
 
 export const AuthContext = createContext({} as AuthContextData);
@@ -43,9 +44,17 @@ export function AuthProvider({ children }: AuthProvider) {
 
     localStorage.setItem('@dowhile:token', token);
 
+    api.defaults.headers.common.authorization = `Bearer ${token}`;
+
     setUser(user);
   }
 
+  function signOut() {
+    setUser(null);
+    localStorage.removeItem('@dowhile:token');
+  }
+
+  // Get user profile
   useEffect(() => {
     const token = localStorage.getItem('@dowhile:token');
 
@@ -53,12 +62,13 @@ export function AuthProvider({ children }: AuthProvider) {
       // Setting user auth token to authorization headers
       api.defaults.headers.common.authorization = `Bearer ${token}`;
 
-      api.get('profile').then(response => {
-        console.log(response.data);
+      api.get<User>('profile').then(response => {
+        setUser(response.data);
       })
     }
   }, []);
 
+  // Function to hude github code from url query and sign in user
   useEffect(() => {
     const url = window.location.href;
     const hasGithubCode = url.includes('?code=');
@@ -74,7 +84,7 @@ export function AuthProvider({ children }: AuthProvider) {
 
   return (
     // All children react components will get access to this information
-    <AuthContext.Provider value={{ signInUrl, user }}>
+    <AuthContext.Provider value={{ signInUrl, user, signOut }}>
       {children}
     </AuthContext.Provider>
   )
