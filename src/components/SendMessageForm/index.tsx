@@ -1,8 +1,11 @@
 import { FormEvent, useContext, useState } from 'react';
 import { VscGithubInverted, VscSignOut } from 'react-icons/vsc';
+import { ToastContainer, toast } from 'react-toastify';
 import { AuthContext } from '../../context/auth';
 import { api } from '../../services/api';
+
 import styles from './styles.module.scss';
+import 'react-toastify/dist/ReactToastify.css';
 
 export function SendMessageForm() {
   const { user, signOut } = useContext(AuthContext);
@@ -19,6 +22,7 @@ export function SendMessageForm() {
     await api.post('messages', { message });
 
     setMessage('');
+    toast.success('Mensagem enviada com sucesso!');
   }
 
   return (
@@ -47,7 +51,21 @@ export function SendMessageForm() {
           onChange={event => setMessage(event.target.value)}
           value={message}
         />
-        <button type="submit">Enviar mensagem</button>
+        <button className={styles.sendMessageButton} type="submit">Enviar mensagem</button>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={true}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          icon={false}
+          theme="colored"
+          closeButton={false}
+        />
       </form>
     </div>
   );
